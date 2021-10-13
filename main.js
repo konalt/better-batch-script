@@ -20,7 +20,9 @@ function compile(filePath) {
     var lines = file.toString().split("\r\n");
     logToFile(`Loaded file ${filePath} with ${lines.length} lines.`);
     var outFile = "";
-    var isReadingFunction = false;
+    var reading = "function";
+    var newlineChar = " && ";
+    var functionList = "exit /b 1101";
     lines.forEach(_line => {
         /**
          * @type {string}
@@ -44,29 +46,69 @@ function compile(filePath) {
         if (l.startsWith("s1")) {
             l = "@echo on";
         }
-        if (l.startsWith("fn")) {
+        if (l.startsWith("fn ")) {
+            if (reading == "function") throw new CompileError();
             if (args.length == 2) {
                 // Function without arguments.
                 // Check if syntax is gud
                 if (args[1] != "{") {
                     throw new CompileError();
                 } else {
-                    isReadingFunction = true;
-                    l = "exit /b 1101\n:BBSFN_" + args[0];
+                    reading = "function";
+                    functionList += "\n:BBSFN_" + args[0] + "\n";
+                    l = "//skipline";
                 }
             } else l = "rem BBS: Not Supported Yet!";
         }
         if (l == "}") {
-            if (isReadingFunction) {
-                l = "goto :eof";
-                isReadingFunction = false;
+            if (reading == "function") {
+                functionList += "goto :eof" + newlineChar;
+                l = "//skipline";
+                reading = "function";
             } else throw new CompileError();
         }
-        if (l == "fnrun") {
+        if (l.startsWith("fnrun ")) {
             l = "call :BBSFN_" + args.join(" ");
         }
-        outFile += l + "\n";
+        if (l.startsWith("loop ")) {
+            if (reading == "function") throw new CompileError();
+            if (args.length == 2) {
+                // Function without arguments.
+                // Check if syntax is gud
+                if (args[1] != "{") {
+                    throw new CompileError();
+                } else {
+                    reading = "function";
+                    functionList += "\n:BBSFN_" + args[0] + "\n";
+                    l = "//skipline";
+                }
+            } else l = "rem BBS: Not Supported Yet!";
+        }
+        if (l == "}") {
+            if (reading == "function") {
+                functionList += "goto :eof" + newlineChar;
+                l = "//skipline";
+                reading = "function";
+            } else throw new CompileError();
+        }
+        if (l.startsWith("looprun ")) {
+            l = "call :BBSFN_" + args.join(" ");
+        }
+        if (l.startsWith("sleep ")) {
+            l = "timeout /t " + args[0] + " >nul";
+        }
+        // END OF COMMAND SHIT
+        if (l.startsWith("//")) {
+            return;
+        }
+        if (reading == "function") {
+            functionList += l + newlineChar;
+            return;
+        }
+        outFile += l + newlineChar;
     });
+    outFile += functionList;
+    outFile = outFile.substr(0, outFile.length - newlineChar.length);
     console.log("Writing file...");
     var outPath = filePath;
     outPath = outPath.split(".");
