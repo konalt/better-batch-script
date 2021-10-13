@@ -20,8 +20,8 @@ function compile(filePath) {
     var lines = file.toString().split("\r\n");
     logToFile(`Loaded file ${filePath} with ${lines.length} lines.`);
     var outFile = "";
-    var reading = "function";
-    var newlineChar = " && ";
+    var reading = "none";
+    var newlineChar = "\n";
     var functionList = "exit /b 1101";
     lines.forEach(_line => {
         /**
@@ -55,7 +55,7 @@ function compile(filePath) {
                     throw new CompileError();
                 } else {
                     reading = "function";
-                    functionList += "\n:BBSFN_" + args[0] + "\n";
+                    functionList += "\n:BBSFN_" + (parseInt(args[0]) - 1) + "\n";
                     l = "//skipline";
                 }
             } else l = "rem BBS: Not Supported Yet!";
@@ -64,35 +64,27 @@ function compile(filePath) {
             if (reading == "function") {
                 functionList += "goto :eof" + newlineChar;
                 l = "//skipline";
-                reading = "function";
+                reading = "none";
+            } else if (reading == "loop") {
+                l = ")";
+                reading = "none";
             } else throw new CompileError();
         }
         if (l.startsWith("fnrun ")) {
             l = "call :BBSFN_" + args.join(" ");
         }
         if (l.startsWith("loop ")) {
-            if (reading == "function") throw new CompileError();
+            if (reading == "loop") throw new CompileError();
             if (args.length == 2) {
                 // Function without arguments.
                 // Check if syntax is gud
                 if (args[1] != "{") {
                     throw new CompileError();
                 } else {
-                    reading = "function";
-                    functionList += "\n:BBSFN_" + args[0] + "\n";
-                    l = "//skipline";
+                    reading = "loop";
+                    l = "for /l %%p IN (0,1," + args[0] + ") DO (";
                 }
             } else l = "rem BBS: Not Supported Yet!";
-        }
-        if (l == "}") {
-            if (reading == "function") {
-                functionList += "goto :eof" + newlineChar;
-                l = "//skipline";
-                reading = "function";
-            } else throw new CompileError();
-        }
-        if (l.startsWith("looprun ")) {
-            l = "call :BBSFN_" + args.join(" ");
         }
         if (l.startsWith("sleep ")) {
             l = "timeout /t " + args[0] + " >nul";
