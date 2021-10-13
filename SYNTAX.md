@@ -17,3 +17,10 @@ To run a function, you run it using `fnrun`:
 ```
 fnrun showtext "Hello World" "Argument 2"
 ```
+## Loops
+Syntactically, loops are similar to functions. The syntax is `loop [loopamount] { content }`. You can use the variable `$loop` to count how many times you have looped. `$loop` is a zero-based integer.
+```
+loop 10 {
+    echo Looped $loop times.
+}
+```
