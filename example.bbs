@@ -1,0 +1,12 @@
+s0
+title Hello World!
+echo Hello World
+echo off
+fn test {
+    echo test
+}
+loop 10 {
+    echo looped $loop times
+}
+echo Running test
+fnrun test
