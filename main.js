@@ -55,7 +55,7 @@ function compile(filePath) {
                     throw new CompileError();
                 } else {
                     reading = "function";
-                    functionList += "\n:BBSFN_" + (parseInt(args[0]) - 1) + "\n";
+                    functionList += "\n:BBSFN_" + args[0] + "\n";
                     l = "//skipline";
                 }
             } else l = "rem BBS: Not Supported Yet!";
@@ -82,12 +82,15 @@ function compile(filePath) {
                     throw new CompileError();
                 } else {
                     reading = "loop";
-                    l = "for /l %%p IN (0,1," + args[0] + ") DO (";
+                    l = "for /l %%p in (0,1," + (parseInt(args[0]) - 1) + ") do (";
                 }
             } else l = "rem BBS: Not Supported Yet!";
         }
         if (l.startsWith("sleep ")) {
             l = "timeout /t " + args[0] + " >nul";
+        }
+        if (reading == "loop") {
+            l = l.replace(/(\$loop)/gm, "%%p");
         }
         // END OF COMMAND SHIT
         if (l.startsWith("//")) {
