@@ -1,11 +1,8 @@
 # Syntax of BetterBatch
 Most of it is the same, but there are a few differences.
 ## General
-All lines now end with a semicolon.
-```
-echo "Hello World";
-```
-
+`@echo off/on` has been replaced with `s 0/1`.
+Using `echo off/on` now uses the intended behaviour, displaying the string `off/on`.
 ## Functions
 To create a function, use `fn [functionname] [argument list, comma separated] { content }`.
   
