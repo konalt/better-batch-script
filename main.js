@@ -118,6 +118,10 @@ function logToFile(text) {
 }
 
 var theRealArgs = process.argv;
-theRealArgs.splice(0, 2);
+if (theRealArgs[0] == "node") {
+    theRealArgs.splice(0, 2);
+} else {
+    theRealArgs.splice(0, 1);
+}
 theRealArgs = theRealArgs.filter(a => !a.startsWith("-"));
 compile(theRealArgs.join(" "));
