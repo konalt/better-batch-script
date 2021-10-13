@@ -13,7 +13,7 @@ fn showtext arg1, arg2 {
     echo Arg 2: %arg2%;
 }
 ```
-To run a function, you run it as you would any other command:
+To run a function, you run it using `fnrun`:
 ```
-showtext "Hello World" "Argument 2"
+fnrun showtext "Hello World" "Argument 2"
 ```
